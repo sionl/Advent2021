@@ -28,8 +28,7 @@
                         map[sX, y] = map[sX, y] + 1;
                     }
                 }
-
-                if (sY == eY)
+                else if (sY == eY)
                 {
                     for (int x = sX; x <= eX; x++)
                     {
@@ -38,6 +37,45 @@
                     for (int x = eX; x <= sX; x++)
                     {
                         map[x, sY] = map[x, sY] + 1;
+                    }
+                }
+                else
+                {
+                    if (sX < eX && sY < eY)
+                    {
+                        int y = sY;
+                        for (int x = sX; x <= eX; x++)
+                        {
+                            map[x, y] = map[x, y] + 1;
+                            y += 1;
+                        }
+                    }
+                    else if (sX < eX && sY > eY)
+                    {
+                        int y = sY;
+                        for (int x = sX; x <= eX; x++)
+                        {
+                            map[x, y] = map[x, y] + 1;
+                            y -= 1;
+                        }
+                    }
+                    else if (sX > eX && sY > eY)
+                    {
+                        int y = sY;
+                        for (int x = sX; x >= eX; x--)
+                        {
+                            map[x, y] = map[x, y] + 1;
+                            y -= 1;
+                        }
+                    }
+                    else if (sX > eX && sY < eY)
+                    {
+                        int y = sY;
+                        for (int x = sX; x >= eX; x--)
+                        {
+                            map[x, y] = map[x, y] + 1;
+                            y += 1;
+                        }
                     }
                 }
             }
