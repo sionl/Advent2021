@@ -2,110 +2,76 @@
 {
     public class Solution : ISolution
     {
-        private bool Part1 = false;
-        private List<StackItem> stackItems = new();
-        private List<Instruction> instructions = new();
-
-        private class StackItem
-        {
-            public int Number { get; set; }
-            public Stack<char> Crates { get; set; } = new Stack<char>();
-            public string Output => $"{Number} - {string.Join(" ", Crates.Reverse())}";
-        }
-
-        private class Instruction
-        {
-            public int Move { get; set; }
-            public int From { get; set; }
-            public int To { get; set; }
-            public string Output => $"move {Move} from {From} to {To}";
-        }
+        private int[,] map = new int[1000, 1000];
 
         public void Run()
         {
-            ReadData();
-            RunInstructions();
-            OutputData();
-        }
-
-        private void RunInstructions()
-        {
-            foreach (var instruction in instructions)
+            var lines = File.ReadAllText("Day5\\Input1.txt").Split(Environment.NewLine);
+            foreach (var line in lines)
             {
-                if (Part1)
-                    CranePart1(instruction);
-                else
-                    CranePart2(instruction);
-            }
-        }
+                var array = line.Split(" -> ");
+                var point1 = array[0].Split(",");
+                var point2 = array[1].Split(",");
+                var sX = int.Parse(point1[0]);
+                var sY = int.Parse(point1[1]);
+                var eX = int.Parse(point2[0]);
+                var eY = int.Parse(point2[1]);
 
-        private void CranePart1(Instruction instruction)
-        {
-            for (int i = 0; i < instruction.Move; i++)
-            {
-                var crate = stackItems[instruction.From - 1].Crates.Pop();
-                stackItems[instruction.To - 1].Crates.Push(crate);
-            }
-        }
-
-        private void CranePart2(Instruction instruction)
-        {
-            var move = new Stack<char>();
-            for (int i = 0; i < instruction.Move; i++)
-            {
-                move.Push(stackItems[instruction.From - 1].Crates.Pop());
-            }
-            for (int i = 0; i < instruction.Move; i++)
-            {
-                stackItems[instruction.To - 1].Crates.Push(move.Pop());
-            }
-        }
-
-        private void ReadData()
-        {
-            var data = File.ReadAllText("Day5\\Input1.txt");
-
-            var stackNumbers = data.Substring(data.IndexOf("1"));
-            stackNumbers = stackNumbers.Substring(0, stackNumbers.IndexOf(Environment.NewLine));
-            var stackArray = stackNumbers.Split(" ", StringSplitOptions.RemoveEmptyEntries);
-            foreach (var stackNumber in stackArray)
-            {
-                var stack = new StackItem();
-                stack.Number = int.Parse(stackNumber);
-                stackItems.Add(stack);
-            }
-
-            var stackList = data.Substring(0, data.IndexOf("1")).Split(Environment.NewLine).Reverse();
-            foreach (var stackLine in stackList)
-            {
-                for (int i = 0; i < stackLine.Length; i++)
+                if (sX == eX)
                 {
-                    if (stackLine[i] == '[')
+                    for (int y = sY; y <= eY; y++)
                     {
-                        var stackNumber = i / 4;
-                        stackItems[stackNumber].Crates.Push(stackLine[i + 1]);
+                        map[sX, y] = map[sX, y] + 1;
+                    }
+                    for (int y = eY; y <= sY; y++)
+                    {
+                        map[sX, y] = map[sX, y] + 1;
+                    }
+                }
+
+                if (sY == eY)
+                {
+                    for (int x = sX; x <= eX; x++)
+                    {
+                        map[x, sY] = map[x, sY] + 1;
+                    }
+                    for (int x = eX; x <= sX; x++)
+                    {
+                        map[x, sY] = map[x, sY] + 1;
                     }
                 }
             }
 
-            var instructionList = data.Substring(data.IndexOf("m")).Split(Environment.NewLine);
-            foreach (var instructionLine in instructionList)
-            {
-                var instructionArray = instructionLine.Split(" ");
-                var instruction = new Instruction();
-                instruction.Move = int.Parse(instructionArray[1]);
-                instruction.From = int.Parse(instructionArray[3]);
-                instruction.To = int.Parse(instructionArray[5]);
-                instructions.Add(instruction);
-            }
+            OutputData();
         }
 
         private void OutputData()
         {
+            var overlap = 0;
             var builder = new OutputBuilder();
-            builder.AppendLines(stackItems.Select(item => item.Output));
-            var result = string.Join("", stackItems.Select(x => x.Crates.Peek()));
-            builder.Append($"Result: {result}");
+            for (int x = 0; x < map.GetLength(0); x++)
+            {
+                for (int y = 0; y < map.GetLength(1); y++)
+                {
+                    if (map[y, x] > 0)
+                    {
+                        if (map[y, x] > 1)
+                        {
+                            overlap += 1;
+                        }
+                        builder.Append(map[y, x].ToString());
+                    }
+                    else
+                    {
+                        builder.Append(".");
+                    }
+                }
+                builder.AppendNewLine();
+            }
+
+            builder.AppendNewLine();
+            builder.Append($"Overlap: {overlap}");
+
             File.WriteAllText("Day5\\Output.txt", builder.ToString());
         }
     }
